@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Fira+Code:wght@300..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Neon Theme (default) */
+  :root {
+    --background: 220 20% 7%;
+    --foreground: 142 70% 65%;
+
+    --card: 220 18% 10%;
+    --card-foreground: 142 70% 65%;
+
+    --popover: 220 18% 10%;
+    --popover-foreground: 142 70% 65%;
+
+    --primary: 142 70% 55%;
+    --primary-foreground: 220 20% 7%;
+
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 142 50% 70%;
+
+    --muted: 220 15% 13%;
+    --muted-foreground: 220 10% 50%;
+
+    --accent: 142 70% 45%;
+    --accent-foreground: 220 20% 7%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 142 30% 20%;
+    --input: 220 15% 18%;
+    --ring: 142 70% 55%;
+
+    --radius: 0.5rem;
+
+    /* Terminal-specific tokens */
+    --terminal-bg: 220 20% 5%;
+    --terminal-header: 220 18% 12%;
+    --terminal-prompt: 200 80% 60%;
+    --terminal-cursor: 142 70% 55%;
+    --terminal-selection: 142 70% 55%;
+    --terminal-link: 200 80% 65%;
+    --terminal-badge-bg: 142 60% 15%;
+    --terminal-badge-text: 142 70% 65%;
+    --terminal-border-ascii: 142 40% 30%;
+    --terminal-glow: 142 70% 55%;
+    --terminal-dim: 220 10% 40%;
+
+    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 142 70% 65%;
+    --sidebar-primary: 142 70% 55%;
+    --sidebar-primary-foreground: 220 20% 7%;
+    --sidebar-accent: 142 60% 15%;
+    --sidebar-accent-foreground: 142 70% 65%;
+    --sidebar-border: 142 30% 20%;
+    --sidebar-ring: 142 70% 55%;
+  }
+
+  /* Mono Theme */
+  .theme-mono {
+    --foreground: 0 0% 85%;
+    --card-foreground: 0 0% 85%;
+    --popover-foreground: 0 0% 85%;
+    --primary: 0 0% 90%;
+    --primary-foreground: 220 20% 7%;
+    --secondary-foreground: 0 0% 70%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 80%;
+    --accent-foreground: 220 20% 7%;
+    --border: 0 0% 25%;
+    --ring: 0 0% 90%;
+    --terminal-prompt: 0 0% 70%;
+    --terminal-cursor: 0 0% 90%;
+    --terminal-selection: 0 0% 90%;
+    --terminal-link: 210 20% 70%;
+    --terminal-badge-bg: 0 0% 18%;
+    --terminal-badge-text: 0 0% 85%;
+    --terminal-border-ascii: 0 0% 35%;
+    --terminal-glow: 0 0% 90%;
+    --terminal-dim: 0 0% 40%;
+  }
+
+  /* Retro Theme */
+  .theme-retro {
+    --foreground: 35 90% 60%;
+    --card-foreground: 35 90% 60%;
+    --popover-foreground: 35 90% 60%;
+    --primary: 35 90% 55%;
+    --primary-foreground: 220 20% 7%;
+    --secondary-foreground: 35 60% 55%;
+    --muted-foreground: 35 30% 40%;
+    --accent: 35 90% 50%;
+    --accent-foreground: 220 20% 7%;
+    --border: 35 40% 22%;
+    --ring: 35 90% 55%;
+    --terminal-prompt: 25 80% 55%;
+    --terminal-cursor: 35 90% 55%;
+    --terminal-selection: 35 90% 55%;
+    --terminal-link: 45 80% 60%;
+    --terminal-badge-bg: 35 50% 15%;
+    --terminal-badge-text: 35 90% 60%;
+    --terminal-border-ascii: 35 50% 30%;
+    --terminal-glow: 35 90% 55%;
+    --terminal-dim: 35 20% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .terminal-glow {
+    text-shadow: 0 0 8px hsl(var(--terminal-glow) / 0.5),
+                 0 0 20px hsl(var(--terminal-glow) / 0.2);
+  }
+
+  .terminal-glow-strong {
+    text-shadow: 0 0 10px hsl(var(--terminal-glow) / 0.7),
+                 0 0 30px hsl(var(--terminal-glow) / 0.3),
+                 0 0 60px hsl(var(--terminal-glow) / 0.1);
+  }
+
+  .crt-scanlines {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(0 0% 0% / 0.03) 2px,
+      hsl(0 0% 0% / 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+}

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Israel Zeferino</title>
+    <meta name="description" content="Israel Zeferino - Software Engineer" />
+    <link rel="icon" href="./favicon.png" />
+    <meta name="author" content="Israel Zeferino" />
+    <meta name="keywords" content="Israel Zeferino, Software Engineer, Fullstack, Web3" />
+    <meta property="og:title" content="Israel Zeferino" />
+    <meta property="og:description" content="Israel Zeferino - Software Engineer" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./" />
+
+    <!-- SPA redirect: restaura rota enviada pelo 404.html -->
+    <script>
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, '', redirect);
+        }
+      })();
+      (function () {
+        var l = window.location;
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          var path = decoded.split('?');
+          window.history.replaceState(null, '',
+            l.pathname.slice(0, -1) + path[0] + (path[1] ? '?' + path[1] : '') + l.hash
+          );
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
