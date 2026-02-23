@@ -1,4 +1,4 @@
-# cmd-chronicles - Documentação e Estrutura do Projeto
+# portfolio - Documentação e Estrutura do Projeto
 
 ## Visão Geral
 Este projeto é o portfólio interativo do Israel Zeferino, onde o usuário interage através de um **terminal renderizado dentro de um monitor 3D** (estilo computador dos anos 90). Ele foi construído com as tecnologias modernas do ecossistema front-end: React, TypeScript, Vite, TailwindCSS (com Shadcn UI) e Three.js (auxiliado pelo React Three Fiber para renderização 3D declarativa).

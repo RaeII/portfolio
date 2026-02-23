@@ -1,6 +1,6 @@
 # Comandos do Terminal — Referência Completa
 
-> Documentação técnica de todos os comandos disponíveis no terminal interativo do portfólio **cmd-chronicles**.
+> Documentação técnica de todos os comandos disponíveis no terminal interativo do **portfolio**.
 
 ---
 
