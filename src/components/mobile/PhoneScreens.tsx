@@ -1,66 +1,9 @@
-import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePhone, useMenuNav, usePhoneInput } from './PhoneContext';
+import { ScreenLayout, MenuList } from './ScreenLayout';
+import { SnakeScreen } from './SnakeGame';
 import { projects } from '@/data/projects';
 import { skillGroups } from '@/data/skills';
-
-/* ════════════════════════════════════════
-   Shared layout components
-   ════════════════════════════════════════ */
-
-function ScreenLayout({ title, softLeft, softRight, children }: {
-  title?: string;
-  softLeft?: string;
-  softRight?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col h-full" style={{ fontFamily: "'VT323', monospace" }}>
-      {title && (
-        <div
-          className="px-2 py-1 text-center text-[14px] font-bold border-b tracking-wide"
-          style={{ borderColor: 'var(--phone-dim)' }}
-        >
-          ◄ {title}
-        </div>
-      )}
-      <div className="flex-1 overflow-y-auto px-2 py-1 phone-screen-area text-[15px]">
-        {children}
-      </div>
-      <div
-        className="flex justify-between px-2 py-1 text-[11px] border-t"
-        style={{ borderColor: 'var(--phone-dim)', color: 'var(--phone-dim)' }}
-      >
-        <span>{softLeft || ''}</span>
-        <span>{softRight || ''}</span>
-      </div>
-    </div>
-  );
-}
-
-function MenuList({ items, selectedIndex, onTap }: {
-  items: { label: string; icon?: string }[];
-  selectedIndex: number;
-  onTap: (i: number) => void;
-}) {
-  return (
-    <div>
-      {items.map((item, i) => (
-        <div
-          key={i}
-          className="px-2 py-[3px] cursor-pointer transition-colors"
-          style={
-            i === selectedIndex
-              ? { backgroundColor: 'var(--phone-highlight)', color: 'var(--phone-highlight-text)' }
-              : {}
-          }
-          onClick={() => onTap(i)}
-        >
-          {item.icon ? `${item.icon} ` : '> '}{item.label}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 /* ════════════════════════════════════════
    Loading overlay
@@ -400,34 +343,61 @@ function SettingsScreen() {
    EXTRAS SCREEN
    ════════════════════════════════════════ */
 
+const EXTRA_SECRET_SEQUENCE: Array<'up' | 'down' | 'left' | 'right'> = [
+  'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right',
+];
+
 function ExtrasScreen() {
+  const { push } = usePhone();
   const [msg, setMsg] = useState('');
+  const [secretProgress, setSecretProgress] = useState(0);
+  const secretProgressRef = useRef(0);
 
   const items = [
     { label: 'Ringtone 🔔', icon: '♪' },
-    { label: 'Secret Code', icon: '?' },
+    { label: 'Snake 🐍',    icon: '►' },
     { label: 'About Phone', icon: 'ℹ' },
   ];
 
   const handleSelect = useCallback((i: number) => {
     switch (i) {
-      case 0:
-        setMsg('♪ beep boop beep ♪');
-        break;
-      case 1:
-        setMsg('↑↑↓↓←→←→BA\n... nothing happened 😄');
-        break;
-      case 2:
-        setMsg('PocketOS v1.0\nby Israel Zeferino\nPowered by ☕ and 💻');
-        break;
+      case 0: setMsg('♪ beep boop beep ♪'); break;
+      case 1: push('snake'); break;
+      case 2: setMsg('PocketOS v1.0\nby Israel Zeferino\nPowered by ☕ and 💻'); break;
     }
-  }, []);
+  }, [push]);
 
   const { selectedIndex, setSelectedIndex } = useMenuNav(items.length, handleSelect);
+
+  usePhoneInput(useCallback((type: string) => {
+    if (type !== 'up' && type !== 'down' && type !== 'left' && type !== 'right') return;
+
+    const expected = EXTRA_SECRET_SEQUENCE[secretProgressRef.current];
+    if (type === expected) {
+      const next = secretProgressRef.current + 1;
+      secretProgressRef.current = next;
+      setSecretProgress(next);
+      if (next === EXTRA_SECRET_SEQUENCE.length) {
+        secretProgressRef.current = 0;
+        setSecretProgress(0);
+        push('snake');
+      }
+      return;
+    }
+
+    const restart = type === EXTRA_SECRET_SEQUENCE[0] ? 1 : 0;
+    secretProgressRef.current = restart;
+    setSecretProgress(restart);
+  }, [push]));
 
   return (
     <ScreenLayout title="Extras" softLeft="Back" softRight="Select">
       <MenuList items={items} selectedIndex={selectedIndex} onTap={(i) => { setSelectedIndex(i); handleSelect(i); }} />
+      {selectedIndex === 1 && secretProgress > 0 && (
+        <div className="mt-2 text-center text-[11px]" style={{ color: 'var(--phone-dim)' }}>
+          Konami: {secretProgress}/{EXTRA_SECRET_SEQUENCE.length}
+        </div>
+      )}
       {msg && (
         <div className="mt-3 text-center text-[12px] whitespace-pre-wrap">{msg}</div>
       )}
@@ -450,8 +420,8 @@ export function PhoneScreens() {
       const screenNames: Record<string, string> = {
         about: 'About', projects: 'Projects', skills: 'Skills',
         timeline: 'Timeline', contact: 'Contact', settings: 'Settings',
-        extras: 'Extras', 'project-detail': 'Project', 'skill-group': 'Skills',
-        'timeline-detail': 'Timeline',
+        extras: 'Extras', snake: 'Snake', 'project-detail': 'Project',
+        'skill-group': 'Skills', 'timeline-detail': 'Timeline',
       };
       setLoadingText(`Opening ${screenNames[current.id] || current.id}...`);
       setLoading(true);
@@ -474,6 +444,7 @@ export function PhoneScreens() {
       case 'contact': return <ContactScreen />;
       case 'settings': return <SettingsScreen />;
       case 'extras': return <ExtrasScreen />;
+      case 'snake':  return <SnakeScreen />;
       default: return <HomeScreen />;
     }
   })();
