@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Fira+Code:wght@300..700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Fira+Code:wght@300..700&family=VT323&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -158,4 +157,40 @@
     from { width: 0; }
     to { width: 100%; }
   }
+}
+
+/* ── Phone LCD Themes ── */
+
+.phone-theme-green {
+  --phone-bg: hsl(90 18% 60%);
+  --phone-text: hsl(90 30% 14%);
+  --phone-highlight: hsl(90 30% 14%);
+  --phone-highlight-text: hsl(90 22% 75%);
+  --phone-dim: hsl(90 18% 36%);
+  --phone-border: hsl(90 14% 48%);
+}
+
+.phone-theme-gray {
+  --phone-bg: hsl(60 4% 70%);
+  --phone-text: hsl(0 0% 16%);
+  --phone-highlight: hsl(0 0% 16%);
+  --phone-highlight-text: hsl(60 4% 70%);
+  --phone-dim: hsl(60 2% 42%);
+  --phone-border: hsl(60 2% 54%);
+}
+
+.phone-theme-amber {
+  --phone-bg: hsl(40 55% 55%);
+  --phone-text: hsl(35 100% 12%);
+  --phone-highlight: hsl(35 100% 12%);
+  --phone-highlight-text: hsl(40 55% 68%);
+  --phone-dim: hsl(38 40% 34%);
+  --phone-border: hsl(38 35% 44%);
+}
+
+.phone-screen-area {
+  scrollbar-width: none;
+}
+.phone-screen-area::-webkit-scrollbar {
+  display: none;
 }
