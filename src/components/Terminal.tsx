@@ -4,7 +4,7 @@ import { TerminalHistory } from "./TerminalHistory";
 import { TerminalInput } from "./TerminalInput";
 import { CommandChips } from "./CommandChips";
 import { ProjectModal } from "./ProjectModal";
-import { WELCOME_BANNER, commands, getAutocomplete, type ThemeName, type ModeName } from "@/lib/commands/handlers";
+import { WELCOME_BANNER, commands, getAutocomplete, type ThemeName } from "@/lib/commands/handlers";
 import { parseCommand } from "@/lib/commands/parser";
 import { projects } from "@/data/projects";
 
@@ -19,7 +19,6 @@ interface TerminalState {
   inputHistory: string[];
   historyIndex: number;
   theme: ThemeName;
-  mode: ModeName;
 }
 
 type Action =
@@ -27,7 +26,6 @@ type Action =
   | { type: "ADD_OUTPUT"; content: string }
   | { type: "CLEAR" }
   | { type: "SET_THEME"; theme: ThemeName }
-  | { type: "SET_MODE"; mode: ModeName }
   | { type: "SET_HISTORY_INDEX"; index: number };
 
 function reducer(state: TerminalState, action: Action): TerminalState {
@@ -48,8 +46,6 @@ function reducer(state: TerminalState, action: Action): TerminalState {
       return { ...state, history: [] };
     case "SET_THEME":
       return { ...state, theme: action.theme };
-    case "SET_MODE":
-      return { ...state, mode: action.mode };
     case "SET_HISTORY_INDEX":
       return { ...state, historyIndex: action.index };
     default:
@@ -59,13 +55,11 @@ function reducer(state: TerminalState, action: Action): TerminalState {
 
 function getInitialState(): TerminalState {
   const savedTheme = localStorage.getItem("terminal-theme") as ThemeName | null;
-  const savedMode = localStorage.getItem("terminal-mode") as ModeName | null;
   return {
     history: [{ type: "output", content: WELCOME_BANNER, timestamp: Date.now() }],
     inputHistory: [],
     historyIndex: -1,
     theme: savedTheme || "neon",
-    mode: savedMode || "dev",
   };
 }
 
@@ -85,10 +79,6 @@ export function Terminal({ embedded = false }: { embedded?: boolean }) {
     }
     localStorage.setItem("terminal-theme", state.theme);
   }, [state.theme]);
-
-  useEffect(() => {
-    localStorage.setItem("terminal-mode", state.mode);
-  }, [state.mode]);
 
   // Scroll to anchor position, or stay at top if content fits without scrolling
   useEffect(() => {
@@ -123,8 +113,6 @@ export function Terminal({ embedded = false }: { embedded?: boolean }) {
 
     const ctx = {
       setTheme: (t: ThemeName) => dispatch({ type: "SET_THEME", theme: t }),
-      setMode: (m: ModeName) => dispatch({ type: "SET_MODE", mode: m }),
-      mode: state.mode,
       clearHistory: () => dispatch({ type: "CLEAR" }),
       addOutput: (content: string) => dispatch({ type: "ADD_OUTPUT", content: String(content) }),
       openProject: (slug: string, cs?: boolean) => {
@@ -145,7 +133,7 @@ export function Terminal({ embedded = false }: { embedded?: boolean }) {
     if (result && typeof result === "string" && result.length > 0) {
       dispatch({ type: "ADD_OUTPUT", content: result });
     }
-  }, [state.mode]);
+  }, []);
 
   const handleHistoryNav = useCallback((direction: "up" | "down") => {
     const { inputHistory, historyIndex } = state;
@@ -170,7 +158,7 @@ export function Terminal({ embedded = false }: { embedded?: boolean }) {
   return (
     <div className={embedded ? "w-full h-full" : "flex items-center justify-center min-h-screen bg-background p-2 sm:p-4 md:p-8"}>
       <div className={embedded ? "w-full h-full flex flex-col overflow-hidden bg-terminal-bg" : "w-full max-w-4xl h-[95vh] sm:h-[90vh] flex flex-col rounded-lg overflow-hidden border border-border shadow-2xl shadow-primary/10"}>
-        <TerminalHeader theme={state.theme} mode={state.mode} />
+        <TerminalHeader theme={state.theme} />
         <div ref={scrollRef} className="flex-1 overflow-y-auto bg-terminal-bg p-3 sm:p-4 font-mono text-xs sm:text-sm">
           {!embedded && <div className="crt-scanlines fixed inset-0 pointer-events-none z-50" />}
           <TerminalHistory entries={state.history} />

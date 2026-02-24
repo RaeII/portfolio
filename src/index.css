@@ -188,6 +188,126 @@
   --phone-border: hsl(38 35% 44%);
 }
 
+/* ── Phone 3D Body ── */
+
+.phone-body {
+  background: linear-gradient(
+    168deg,
+    #5e5e70 0%,
+    #515162 8%,
+    #4a4a5a 20%,
+    #3e3e4e 45%,
+    #343448 65%,
+    #2c2c3e 85%,
+    #25253a 100%
+  );
+  border: 1px solid rgba(100, 100, 120, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 -1px 0 rgba(0,0,0,0.25),
+    0 2px 4px rgba(0,0,0,0.25),
+    0 6px 16px rgba(0,0,0,0.35),
+    0 16px 48px rgba(0,0,0,0.45),
+    0 24px 80px rgba(0,0,0,0.3);
+}
+
+.phone-edge-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.11) 0%,
+    rgba(255,255,255,0.04) 1.5%,
+    rgba(255,255,255,0.01) 3%,
+    transparent 6%,
+    transparent 94%,
+    rgba(0,0,0,0.04) 97%,
+    rgba(0,0,0,0.14) 98.5%,
+    rgba(0,0,0,0.24) 100%
+  );
+}
+
+/* ── Table / Surface Shadow ── */
+
+.phone-table-shadow {
+  width: 250px;
+  height: 20px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,0.5) 0%,
+    rgba(0,0,0,0.22) 40%,
+    rgba(0,0,0,0.06) 70%,
+    transparent 100%
+  );
+  filter: blur(7px);
+  flex-shrink: 0;
+}
+
+/* ── Phone 3D Buttons ── */
+
+.phone-btn {
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-image 0.1s ease;
+}
+
+.phone-btn-soft {
+  box-shadow:
+    0 3px 5px rgba(0,0,0,0.5),
+    0 1px 2px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.09);
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.07), transparent 50%, rgba(0,0,0,0.1));
+}
+
+.phone-btn-soft:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow:
+    0 0 1px rgba(0,0,0,0.3),
+    inset 0 2px 5px rgba(0,0,0,0.4);
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.05), transparent 50%, rgba(255,255,255,0.02));
+}
+
+.phone-btn-num {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.45),
+    0 1px 1px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.06), transparent 50%, rgba(0,0,0,0.08));
+}
+
+.phone-btn-num:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow:
+    0 0 1px rgba(0,0,0,0.25),
+    inset 0 2px 4px rgba(0,0,0,0.35);
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.04), transparent 50%, rgba(255,255,255,0.02));
+}
+
+.phone-btn-center {
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.5),
+    0 1px 3px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.09), transparent 40%, rgba(0,0,0,0.12));
+}
+
+.phone-btn-center:active {
+  box-shadow:
+    0 0 2px rgba(0,0,0,0.4),
+    inset 0 3px 6px rgba(0,0,0,0.45);
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.06), transparent 40%, rgba(255,255,255,0.02));
+}
+
+.phone-dpad-ring {
+  box-shadow:
+    0 3px 8px rgba(0,0,0,0.4),
+    inset 0 3px 8px rgba(0,0,0,0.55),
+    inset 0 -1px 0 rgba(255,255,255,0.05);
+}
+
 .phone-screen-area {
   scrollbar-width: none;
 }

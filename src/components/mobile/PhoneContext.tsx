@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 
 export type PhoneTheme = 'green' | 'gray' | 'amber';
-export type PhoneMode = 'dev' | 'recruiter';
 
 export interface ScreenEntry {
   id: string;
@@ -17,8 +16,6 @@ interface PhoneContextType {
   setTheme: (t: PhoneTheme) => void;
   soundOn: boolean;
   setSoundOn: (v: boolean) => void;
-  mode: PhoneMode;
-  setMode: (m: PhoneMode) => void;
 }
 
 const PhoneCtx = createContext<PhoneContextType>(null!);
@@ -71,7 +68,6 @@ export function PhoneProvider({ children }: { children: ReactNode }) {
   const [stack, setStack] = useState<ScreenEntry[]>([{ id: 'home' }]);
   const [theme, setTheme] = useState<PhoneTheme>('green');
   const [soundOn, setSoundOn] = useState(false);
-  const [mode, setMode] = useState<PhoneMode>('dev');
 
   const push = useCallback((id: string, params?: Record<string, any>) => {
     setStack(s => [...s, { id, params }]);
@@ -109,7 +105,7 @@ export function PhoneProvider({ children }: { children: ReactNode }) {
   }, [back]));
 
   return (
-    <PhoneCtx.Provider value={{ stack, current, push, back, theme, setTheme, soundOn, setSoundOn, mode, setMode }}>
+    <PhoneCtx.Provider value={{ stack, current, push, back, theme, setTheme, soundOn, setSoundOn }}>
       {children}
     </PhoneCtx.Provider>
   );

@@ -10,7 +10,6 @@ export type TerminalOutput = {
 };
 
 export type ThemeName = "neon" | "mono" | "retro";
-export type ModeName = "dev" | "recruiter";
 
 export interface CommandDef {
   name: string;
@@ -21,8 +20,6 @@ export interface CommandDef {
 
 export interface CommandContext {
   setTheme: (t: ThemeName) => void;
-  setMode: (m: ModeName) => void;
-  mode: ModeName;
   clearHistory: () => void;
   addOutput: (content: string | React.ReactNode) => void;
   openProject: (slug: string, showCase?: boolean) => void;
@@ -46,8 +43,7 @@ const BANNER = `
   Digite "help" para ver os comandos disponíveis.
 `;
 
-function formatProjectCard(p: typeof projects[0], recruiter: boolean): string {
-  const line = "─".repeat(44);
+function formatProjectCard(p: typeof projects[0]): string {
   let card = `┌─ ${p.title} (${p.year}) ${"─".repeat(Math.max(0, 41 - p.title.length - 7))}┐\n`;
   card += `│ ${p.oneLiner.padEnd(44)}│\n`;
   card += `│ Stack: ${p.stack.slice(0, 4).join(", ").padEnd(37)}│\n`;
@@ -55,9 +51,7 @@ function formatProjectCard(p: typeof projects[0], recruiter: boolean): string {
     const links = [p.links.github ? "GitHub" : "", p.links.live ? "Live" : ""].filter(Boolean).join(" | ");
     card += `│ Links: ${links.padEnd(37)}│\n`;
   }
-  if (!recruiter) {
-    card += `│ Tags: ${p.tags.map(t => `[${t}]`).join(" ").padEnd(38)}│\n`;
-  }
+  card += `│ Tags: ${p.tags.map(t => `[${t}]`).join(" ").padEnd(38)}│\n`;
   card += `└${"─".repeat(46)}┘`;
   return card;
 }
@@ -94,20 +88,7 @@ export const commands: CommandDef[] = [
     name: "about",
     description: "Sobre mim – bio, foco e stack",
     usage: "about",
-    run: (_p, ctx) => {
-      if (ctx.mode === "recruiter") {
-        return `Israel Zeferino – Software Engineer
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📍 Itajaí, SC – Brasil
-💼 4+ anos de experiência como Software Engineer
-🏆 Campeão ETHSamba 2024 & HackaNation 2025
-
-Foco: Fullstack (React + Node.js) com experiência em Web3
-Disponível para oportunidades remotas ou híbridas.
-
-→ contact   para informações de contato
-→ resume    para currículo completo`;
-      }
+    run: () => {
       return `┌─ israel.zeferino ────────────────────────────┐
 │                                              │
 │  Software Engineer com experiência no        │
@@ -138,7 +119,7 @@ Disponível para oportunidades remotas ou híbridas.
     name: "skills",
     description: "Skills agrupadas com nível",
     usage: "skills [--group <nome>]",
-    run: (parsed, ctx) => {
+    run: (parsed) => {
       const groupFilter = parsed.flags.group as string | undefined;
       const filtered = groupFilter
         ? skillGroups.filter(g => g.group.toLowerCase().includes(groupFilter.toLowerCase()))
@@ -150,10 +131,9 @@ Disponível para oportunidades remotas ou híbridas.
 
       return filtered.map(g => {
         const header = `\n── ${g.group} ${"─".repeat(Math.max(0, 40 - g.group.length))}`;
-        const skills = g.skills.map(s => {
-          const base = `  ${s.name.padEnd(16)} ${formatSkillLevel(s.level)} ${s.level}`;
-          return ctx.mode === "dev" ? `${base}\n${"".padEnd(17)}↳ ${s.proof}` : base;
-        }).join("\n");
+        const skills = g.skills.map(s =>
+          `  ${s.name.padEnd(16)} ${formatSkillLevel(s.level)} ${s.level}\n${"".padEnd(17)}↳ ${s.proof}`
+        ).join("\n");
         return `${header}\n${skills}`;
       }).join("\n");
     },
@@ -162,7 +142,7 @@ Disponível para oportunidades remotas ou híbridas.
     name: "projects",
     description: "Lista de projetos (use --tag, --year, --featured)",
     usage: "projects [--tag <tag>] [--year <ano>] [--featured]",
-    run: (parsed, ctx) => {
+    run: (parsed) => {
       let filtered = [...projects];
 
       if (parsed.flags.tag) {
@@ -179,7 +159,7 @@ Disponível para oportunidades remotas ou híbridas.
         return "Nenhum projeto encontrado com esses filtros. Tente: projects --featured";
       }
 
-      const cards = filtered.map(p => formatProjectCard(p, ctx.mode === "recruiter")).join("\n\n");
+      const cards = filtered.map(p => formatProjectCard(p)).join("\n\n");
       return `${filtered.length} projeto(s) encontrado(s):\n\n${cards}\n\n→ Use "open <slug>" para mais detalhes.\n  Slugs: ${filtered.map(p => p.slug).join(", ")}`;
     },
   },
@@ -258,20 +238,6 @@ Disponível para oportunidades remotas ou híbridas.
       }
       ctx.setTheme(name);
       return `✓ Tema alterado para "${name}"`;
-    },
-  },
-  {
-    name: "mode",
-    description: "Altera o modo de exibição (dev | recruiter)",
-    usage: "mode <dev|recruiter>",
-    run: (parsed, ctx) => {
-      const name = parsed.args[0] as ModeName;
-      const valid: ModeName[] = ["dev", "recruiter"];
-      if (!name || !valid.includes(name)) {
-        return `Modos disponíveis: ${valid.join(", ")}\nUso: mode recruiter`;
-      }
-      ctx.setMode(name);
-      return `✓ Modo alterado para "${name}" ${name === "recruiter" ? "– conteúdo simplificado" : "– conteúdo completo"}`;
     },
   },
   {

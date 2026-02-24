@@ -83,7 +83,7 @@ function LoadingOverlay({ text }: { text: string }) {
    ════════════════════════════════════════ */
 
 function HomeScreen() {
-  const { push, mode } = usePhone();
+  const { push } = usePhone();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -108,7 +108,7 @@ function HomeScreen() {
 
   const hh = time.getHours().toString().padStart(2, '0');
   const mm = time.getMinutes().toString().padStart(2, '0');
-  const carrier = mode === 'dev' ? 'BR-DEV' : 'BR-REC';
+  const carrier = 'BR-DEV';
 
   return (
     <ScreenLayout softLeft="Menu" softRight="Select">
@@ -141,18 +141,12 @@ function HomeScreen() {
    ════════════════════════════════════════ */
 
 function AboutScreen() {
-  const { mode } = usePhone();
   const [page, setPage] = useState(0);
 
-  const pages = mode === 'dev'
-    ? [
-        'Israel Zeferino\nSoftware Engineer\n\n4+ anos de experiência em\ndesenvolvimento fullstack.\n\nStack principal:\nReact, Node.js, NestJS,\nTypeScript, Web3',
-        'Conquistas:\n\n🏆 Campeão ETHSamba 2024\n   Rio de Janeiro\n\n🏆 Campeão HackaNation 2025\n   São Paulo\n\nFoco em arquitetura\nescalável e código limpo.',
-      ]
-    : [
-        'Israel Zeferino\nSoftware Engineer\n\n4+ anos desenvolvendo\nsistemas corporativos e\nprodutos digitais.\n\nDisponível para\noportunidades.',
-        'Destaques:\n\n• 2x campeão de hackathons\n• Liderança técnica\n• Fullstack (React + Node)\n• Experiência Web3\n• DevOps & CI/CD',
-      ];
+  const pages = [
+    'Israel Zeferino\nSoftware Engineer\n\n4+ anos de experiência em\ndesenvolvimento fullstack.\n\nStack principais:\nPHP, Node.js, React.js, NestJS,TypeScript, Web3',
+    'Conquistas:\n\n🏆 Campeão ETHSamba 2024\n   Rio de Janeiro\n\n🏆 Campeão HackaNation 2025\n   São Paulo\n\nFoco em arquitetura\nescalável e código limpo.',
+  ];
 
   usePhoneInput(useCallback((t: string) => {
     if (t === 'right' || t === 'down') setPage(p => Math.min(pages.length - 1, p + 1));
@@ -278,11 +272,12 @@ function SkillGroupScreen({ group }: { group: string }) {
    ════════════════════════════════════════ */
 
 const timelineData = [
-  { year: 2025, title: 'HackaNation', desc: 'Campeão do HackaNation 2025 – São Paulo. Inovação tecnológica e resolução de problemas reais.' },
-  { year: 2024, title: 'Valocracia & Monkey Branch', desc: 'Campeão ETHSamba 2024. Liderança técnica em sistemas corporativos na Monkey Branch.' },
+  { year: 2017, title: 'Aprendendo a Programar', desc: 'Início da jornada como desenvolvedor.' },
+  { year: 2022, title: 'Estágio em Desenvolvimento', desc: 'Estágio em Desenvolvimento de Software | Empresa Seja Prime' },
+  { year: 2022, title: 'Monkey Branch', desc: 'Desenvolvedor na Monkey Branch (Cargo atual)' },
   { year: 2023, title: 'Discord Bots & Mobile', desc: 'Automações com Discord.js, apps React Native, e projetos freelance.' },
-  { year: 2022, title: 'Primeiros Projetos', desc: 'Início de projetos freelance e contribuições open source.' },
-  { year: 2021, title: 'Início da Carreira', desc: 'Primeiros passos como desenvolvedor profissional.' },
+  { year: 2024, title: 'Valocracia', desc: 'Campeão ETHSamba 2024. Desenvolvedor Web3 na Valocracia.' },
+  { year: 2025, title: 'HackaNation', desc: 'Campeão do HackaNation 2025 – São Paulo' },
 ];
 
 function TimelineScreen() {
@@ -331,11 +326,11 @@ function ContactScreen() {
   const handleSelect = useCallback((i: number) => {
     switch (i) {
       case 0:
-        navigator.clipboard.writeText('israelzeferino@gmail.com').then(() => setCopied(true));
+        navigator.clipboard.writeText('israel.zeferino@hotmail.com').then(() => setCopied(true));
         setTimeout(() => setCopied(false), 2000);
         break;
       case 1:
-        window.open('https://linkedin.com/in/israelzeferino', '_blank');
+        window.open('https://www.linkedin.com/in/dev-israel-zeferino/', '_blank');
         break;
       case 2:
         window.open('https://github.com/RaeII', '_blank');
@@ -371,12 +366,11 @@ function ContactScreen() {
    ════════════════════════════════════════ */
 
 function SettingsScreen() {
-  const { theme, setTheme, soundOn, setSoundOn, mode, setMode } = usePhone();
+  const { theme, setTheme, soundOn, setSoundOn } = usePhone();
 
   const items = [
     { label: `Tema: ${theme === 'green' ? 'LCD Green' : theme === 'gray' ? 'Mono Gray' : 'Amber'}`, icon: '◈' },
     { label: `Som: ${soundOn ? 'On' : 'Off'}`, icon: '♪' },
-    { label: `Modo: ${mode === 'dev' ? 'Developer' : 'Recruiter'}`, icon: '⚡' },
   ];
 
   const handleSelect = useCallback((i: number) => {
@@ -390,11 +384,8 @@ function SettingsScreen() {
       case 1:
         setSoundOn(!soundOn);
         break;
-      case 2:
-        setMode(mode === 'dev' ? 'recruiter' : 'dev');
-        break;
     }
-  }, [theme, soundOn, mode, setTheme, setSoundOn, setMode]);
+  }, [theme, soundOn, setTheme, setSoundOn]);
 
   const { selectedIndex, setSelectedIndex } = useMenuNav(items.length, handleSelect);
 
@@ -422,15 +413,12 @@ function ExtrasScreen() {
     switch (i) {
       case 0:
         setMsg('♪ beep boop beep ♪');
-        setTimeout(() => setMsg(''), 2000);
         break;
       case 1:
         setMsg('↑↑↓↓←→←→BA\n... nothing happened 😄');
-        setTimeout(() => setMsg(''), 3000);
         break;
       case 2:
         setMsg('PocketOS v1.0\nby Israel Zeferino\nPowered by ☕ and 💻');
-        setTimeout(() => setMsg(''), 3000);
         break;
     }
   }, []);
@@ -441,7 +429,7 @@ function ExtrasScreen() {
     <ScreenLayout title="Extras" softLeft="Back" softRight="Select">
       <MenuList items={items} selectedIndex={selectedIndex} onTap={(i) => { setSelectedIndex(i); handleSelect(i); }} />
       {msg && (
-        <div className="mt-3 text-center text-[12px] whitespace-pre-wrap animate-pulse">{msg}</div>
+        <div className="mt-3 text-center text-[12px] whitespace-pre-wrap">{msg}</div>
       )}
     </ScreenLayout>
   );
