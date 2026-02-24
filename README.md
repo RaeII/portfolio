@@ -17,7 +17,7 @@ Projeto focado em experiência visual e identidade técnica: uma interface de te
 - Three.js + React Three Fiber
 
 ## Demo
-- Produção: [israel.zeferino.dev](https://israel.zeferino.dev)
+- Produção: [israelzeferino.dev](https://israelzeferino.dev)
 
 ## Executar localmente
 ```bash
