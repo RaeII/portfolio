@@ -28,6 +28,31 @@
     <meta name="twitter:description" content="Israel Zeferino - Software Engineer" />
     <meta name="twitter:image" content="https://israelzeferino.dev/israel_zeferino.png" />
 
+    <!-- Google tag (gtag.js) -->
+    <script>
+      (function () {
+        var MEASUREMENT_ID = 'G-HDWPN58YFC';
+        var ALLOWED_HOSTNAMES = ['israelzeferino.dev', 'www.israelzeferino.dev'];
+        var isAllowedHostname = ALLOWED_HOSTNAMES.indexOf(window.location.hostname) !== -1;
+
+        // Evita coleta em localhost/staging, reduzindo ruído e abuso.
+        if (!isAllowedHostname) return;
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', MEASUREMENT_ID, {
+          anonymize_ip: true,
+          allow_google_signals: false
+        });
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(MEASUREMENT_ID);
+        document.head.appendChild(script);
+      })();
+    </script>
+
     <!-- SPA redirect: restaura rota enviada pelo 404.html -->
     <script>
       (function () {
