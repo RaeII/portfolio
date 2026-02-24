@@ -44,15 +44,28 @@ const BANNER = `
 `;
 
 function formatProjectCard(p: typeof projects[0]): string {
-  let card = `┌─ ${p.title} (${p.year}) ${"─".repeat(Math.max(0, 41 - p.title.length - 7))}┐\n`;
-  card += `│ ${p.oneLiner.padEnd(44)}│\n`;
-  card += `│ Stack: ${p.stack.slice(0, 4).join(", ").padEnd(37)}│\n`;
+  const W = 52;
+  const titleText = `─ ${p.title} (${p.year}) `;
+  const topDashes = Math.max(1, W - titleText.length);
+
+  const lines: string[] = [
+    ` ${p.oneLiner}`,
+    ` Stack: ${p.stack.slice(0, 4).join(", ")}`,
+  ];
+
   if (p.links.live || p.links.github) {
     const links = [p.links.github ? "GitHub" : "", p.links.live ? "Live" : ""].filter(Boolean).join(" | ");
-    card += `│ Links: ${links.padEnd(37)}│\n`;
+    lines.push(` Links: ${links}`);
   }
-  card += `│ Tags: ${p.tags.map(t => `[${t}]`).join(" ").padEnd(38)}│\n`;
-  card += `└${"─".repeat(46)}┘`;
+
+  lines.push(` Tags: ${p.tags.map(t => `[${t}]`).join(" ")}`);
+
+  let card = `┌${titleText}${"─".repeat(topDashes)}┐\n`;
+  for (const line of lines) {
+    card += `│${line.padEnd(W)}│\n`;
+  }
+  card += `└${"─".repeat(W)}┘`;
+
   return card;
 }
 
@@ -93,8 +106,8 @@ export const commands: CommandDef[] = [
 │                                              │
 │  Software Engineer com experiência no        │
 │  desenvolvimento de sistemas web             │
-│  corporativos utilizando Node.js, NestJS,    │
-│  React e Next.js.                            │
+│  corporativos utilizando PHP, Node.js,       │
+│  NestJS, React.js, TypeScript e Web3.        │
 │                                              │
 │  Atuação de ponta a ponta no ciclo de        │
 │  desenvolvimento: análise de requisitos,     │
@@ -108,9 +121,10 @@ export const commands: CommandDef[] = [
 │  e participação ativa em decisões de         │
 │  engenharia.                                 │
 │                                              │
-│  📍 Itajaí – Santa Catarina, Brasil          │
+│  📍 Santa Catarina, Brasil                   │
 │  📧 israel.zeferino@hotmail.com              │
 │  🔗 github.com/RaeII                         │
+│  💼 linkedin.com/in/dev-israel-zeferino      │
 │                                              │
 └──────────────────────────────────────────────┘`;
     },
@@ -187,17 +201,17 @@ export const commands: CommandDef[] = [
         navigator.clipboard?.writeText("israel.zeferino@hotmail.com");
         return "📋 Email copiado: israel.zeferino@hotmail.com";
       }
-      return `┌─ Contato ────────────────────────────────────┐
-│                                              │
-│  📧 israel.zeferino@hotmail.com              │
-│  📱 (48) 9 9857-4630                         │
-│  🔗 github.com/RaeII                         │
-│  💼 LinkedIn: Israel Zeferino                │
-│  📍 Itajaí – SC, Brasil                      │
-│                                              │
-│  → contact --copy email  para copiar email   │
-│                                              │
-└──────────────────────────────────────────────┘`;
+      return `┌─ Contato ────────────────────────────────────────────┐
+│                                                      │
+│  📧 israel.zeferino@hotmail.com                      │
+│  📱 (48) 9 9857-4630                                 │
+│  🔗 github.com/RaeII                                 │
+│  💼 linkedin.com/in/dev-israel-zeferino              │
+│  📍 Santa Catarina, Brasil                           │
+│                                                      │
+│  → contact --copy email  para copiar email           │
+│                                                      │
+└──────────────────────────────────────────────────────┘`;
     },
   },
   {

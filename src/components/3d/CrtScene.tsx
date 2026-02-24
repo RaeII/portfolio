@@ -19,29 +19,45 @@ function detectWebGL(): boolean {
   }
 }
 
-// Posições padrão da câmera
+// Posições da câmera
+const INTRO_CAM_POS = new THREE.Vector3(-7, 2.8, 5.5);
 const DEFAULT_CAM_POS = new THREE.Vector3(-4, 1.5, 3);
 const DEFAULT_CAM_LOOK = new THREE.Vector3(0.1, 0.8, 0);
 const FOCUS_CAM_POS = new THREE.Vector3(-2.6, 1.3, 0);
 const FOCUS_CAM_LOOK = new THREE.Vector3(0, 0.85, 0);
 
-function CameraController({ focusTerminal }: { focusTerminal: boolean }) {
+const SCENE_SETTLE_MS = 600;
+
+function SceneReadyNotifier({ onReady }: { onReady: () => void }) {
+  const called = useRef(false);
+  useEffect(() => {
+    if (called.current) return;
+    called.current = true;
+    const timer = setTimeout(onReady, SCENE_SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [onReady]);
+  return null;
+}
+
+function CameraController({ focusTerminal, introPhase }: { focusTerminal: boolean; introPhase: boolean }) {
   const { camera, controls } = useThree();
-  const targetPos = useRef(DEFAULT_CAM_POS.clone());
+  const targetPos = useRef(INTRO_CAM_POS.clone());
   const targetLook = useRef(DEFAULT_CAM_LOOK.clone());
   const lookAt = useRef(DEFAULT_CAM_LOOK.clone());
 
   useEffect(() => {
-    if (focusTerminal) {
+    if (introPhase) {
+      targetPos.current.copy(INTRO_CAM_POS);
+      targetLook.current.copy(DEFAULT_CAM_LOOK);
+    } else if (focusTerminal) {
       targetPos.current.copy(FOCUS_CAM_POS);
       targetLook.current.copy(FOCUS_CAM_LOOK);
     } else {
       targetPos.current.copy(DEFAULT_CAM_POS);
       targetLook.current.copy(DEFAULT_CAM_LOOK);
     }
-  }, [focusTerminal]);
+  }, [focusTerminal, introPhase]);
 
-  // Quando os controls são (re)montados (HMR, etc), forçar o target correto
   useEffect(() => {
     if (controls) {
       const orbitControls = controls as unknown as OrbitControlsImpl;
@@ -51,14 +67,22 @@ function CameraController({ focusTerminal }: { focusTerminal: boolean }) {
   }, [controls]);
 
   useFrame((_, delta) => {
-    const speed = focusTerminal ? 2.5 * delta : 3.0 * delta;
+    if (introPhase) {
+      camera.position.copy(INTRO_CAM_POS);
+      if (controls) {
+        const orbitControls = controls as unknown as OrbitControlsImpl;
+        orbitControls.target.copy(DEFAULT_CAM_LOOK);
+        orbitControls.update();
+      } else {
+        camera.lookAt(DEFAULT_CAM_LOOK);
+      }
+      return;
+    }
+
+    const speed = focusTerminal ? 2.5 * delta : 1.2 * delta;
     camera.position.lerp(targetPos.current, speed);
     lookAt.current.lerp(targetLook.current, speed);
 
-    // Sincronizar o target do OrbitControls — ISSO é a chave.
-    // O OrbitControls sobrescreve camera.lookAt() internamente.
-    // Se não atualizarmos controls.target, ele usa o target antigo/default (0,0,0)
-    // e a câmera gira, fazendo o terminal "subir".
     if (controls) {
       const orbitControls = controls as unknown as OrbitControlsImpl;
       orbitControls.target.copy(lookAt.current);
@@ -136,15 +160,20 @@ const DEFAULT_LIGHT_INT = 2.20;
 const DEFAULT_BTC_ROUGH = 0.35;
 const DEFAULT_BTC_METAL = 0.66;
 
-export function CrtScene() {
+export function CrtScene({ onReady, introStart }: { onReady?: () => void; introStart?: boolean }) {
   const [webgl, setWebgl] = useState(true);
   const [focusTerminal, setFocusTerminal] = useState(false);
   const isMobile = useIsMobile();
   const portalRef = useRef<HTMLDivElement>(null);
+  const introPhase = !introStart;
 
   useEffect(() => {
     setWebgl(detectWebGL());
   }, []);
+
+  useEffect(() => {
+    if (!webgl || isMobile) onReady?.();
+  }, [webgl, isMobile, onReady]);
 
   const handleTerminalFocus = useCallback(() => {
     setFocusTerminal(true);
@@ -155,7 +184,14 @@ export function CrtScene() {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden" style={{ background: '#000000' }}>
+    <div
+      className="relative w-full h-screen overflow-hidden"
+      style={{
+        background: '#000000',
+        opacity: introPhase ? 0 : 1,
+        transition: 'opacity 0.4s ease-out',
+      }}
+    >
       {/* DecalPositionControls comentado — serviu apenas para calibrar os valores padrão.
       <div className="absolute top-4 right-4 z-50 pointer-events-auto">
         <DecalPositionControls
@@ -199,7 +235,7 @@ export function CrtScene() {
       />
 
       <Canvas
-        camera={{ position: [-4, 1.5, 3], fov: 38 }}
+        camera={{ position: [-7, 2.8, 5.5], fov: 38 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
         style={{ position: 'absolute', inset: 0 }}
@@ -207,20 +243,19 @@ export function CrtScene() {
           gl.setClearColor('#000000');
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.1;
-          // Garantir orientação correta da câmera desde o primeiro frame
-          camera.position.set(-4, 1.5, 3);
+          camera.position.set(-7, 2.8, 5.5);
           camera.lookAt(0.1, 0.8, 0);
           camera.updateProjectionMatrix();
         }}
       >
         <EnvironmentLight mainLightPosition={DEFAULT_LIGHT_POS} mainLightIntensity={DEFAULT_LIGHT_INT} />
-        {/* Camera Controller */}
-        <CameraController focusTerminal={focusTerminal} />
+        <CameraController focusTerminal={focusTerminal} introPhase={introPhase} />
 
         <OrbitControls
           makeDefault
+          enabled={!introPhase}
           target={[0.1, 0.8, 0]}
-          enablePan={false} // Desativar a alteração da posição da camera
+          enablePan={false}
           enableZoom={true}
           maxDistance={10}
           minDistance={1.5}
@@ -240,6 +275,7 @@ export function CrtScene() {
             btcMetalness={DEFAULT_BTC_METAL}
           />
           <ScreenTerminal onInteract={handleTerminalFocus} portalContainer={portalRef.current} />
+          {onReady && <SceneReadyNotifier onReady={onReady} />}
         </Suspense>
 
         {/* Desk surface */}

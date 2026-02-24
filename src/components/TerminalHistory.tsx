@@ -53,8 +53,8 @@ function processOutput(content: string): React.ReactNode {
       );
     }
     // URLs
-    if (line.includes("github.com") || line.includes("http")) {
-      const urlRegex = /(https?:\/\/[^\s]+|github\.com\/[^\s]+)/g;
+    if (line.includes("github.com") || line.includes("linkedin.com") || line.includes("http")) {
+      const urlRegex = /(https?:\/\/[^\s]+|github\.com\/[^\s]+|linkedin\.com\/[^\s]+)/g;
       const parts = line.split(urlRegex);
       return (
         <span key={i}>

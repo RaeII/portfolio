@@ -5,6 +5,8 @@ interface Props {
   children: ReactNode;
 }
 
+const PHONE_KEYPAD_SOUND_EVENT = 'phone-keypad-input';
+
 export function PhoneShell({ children }: Props) {
   const { theme } = usePhone();
 
@@ -92,6 +94,10 @@ export function PhoneShell({ children }: Props) {
             <button
               key={k}
               className="phone-btn phone-btn-num h-8 rounded-md bg-[#333] text-[#888] text-sm hover:bg-[#3a3a3a] select-none"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent(PHONE_KEYPAD_SOUND_EVENT, { detail: k }));
+              }}
+              aria-label={`Tecla numérica ${k}`}
             >
               {k}
             </button>

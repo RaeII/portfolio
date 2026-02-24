@@ -210,23 +210,32 @@ export function SnakeScreen() {
 
   useEffect(() => { redraw(); }, [redraw]);
 
+  const startGame = useCallback((initialDir?: Dir) => {
+    resetGame();
+    if (initialDir) {
+      dirRef.current = initialDir;
+      nextDirRef.current = initialDir;
+    }
+    phaseRef.current = 'playing';
+    setPhase('playing');
+  }, [resetGame]);
+
   usePhoneInput(useCallback((type: string) => {
-    if (type === 'ok') {
+    const isDir = type === 'up' || type === 'down' || type === 'left' || type === 'right';
+
+    if (type === 'ok' || (isDir && phaseRef.current !== 'playing')) {
       if (phaseRef.current === 'idle' || phaseRef.current === 'dead') {
-        resetGame();
-        phaseRef.current = 'playing';
-        setPhase('playing');
+        startGame(isDir ? type as Dir : undefined);
       }
       return;
     }
 
     if (phaseRef.current !== 'playing') return;
 
-    if ((type === 'up' || type === 'down' || type === 'left' || type === 'right')
-        && type !== OPPOSITE[dirRef.current]) {
+    if (isDir && type !== OPPOSITE[dirRef.current]) {
       nextDirRef.current = type as Dir;
     }
-  }, [resetGame]));
+  }, [startGame]));
 
   return (
     <ScreenLayout title="▓ SNAKE ▓" softLeft="Back" softRight={phase !== 'playing' ? 'OK=Play' : ''}>
@@ -249,17 +258,19 @@ export function SnakeScreen() {
         </div>
 
         {phase === 'idle' && (
-          <div className="mt-1 text-center text-[11px] leading-snug" style={{ color: 'var(--phone-dim)' }}>
-            <div>D-Pad para mover</div>
-            <div className="animate-pulse">► Pressione OK</div>
+          <div className="mt-2 text-center leading-snug">
+            <div className="text-[14px] font-bold animate-pulse">► PRESSIONE OK ◄</div>
+            <div className="text-[11px] mt-1" style={{ color: 'var(--phone-dim)' }}>
+              ou qualquer seta para jogar
+            </div>
           </div>
         )}
 
         {phase === 'dead' && (
-          <div className="mt-1 text-center leading-snug">
-            <div className="text-[13px]">▓ GAME OVER ▓</div>
-            <div className="text-[11px] animate-pulse" style={{ color: 'var(--phone-dim)' }}>
-              OK para reiniciar
+          <div className="mt-2 text-center leading-snug">
+            <div className="text-[14px] font-bold">▓ GAME OVER ▓</div>
+            <div className="text-[12px] mt-1 animate-pulse">
+              OK ou seta para reiniciar
             </div>
           </div>
         )}

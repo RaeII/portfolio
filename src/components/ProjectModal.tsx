@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Project } from "@/data/projects";
 
@@ -8,6 +9,17 @@ interface Props {
 }
 
 export function ProjectModal({ project, showCase, onClose }: Props) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
     <AnimatePresence>
       <motion.div
@@ -29,7 +41,7 @@ export function ProjectModal({ project, showCase, onClose }: Props) {
           <div className="flex items-center justify-between px-4 py-2.5 bg-terminal-header border-b border-border">
             <div className="flex items-center gap-2">
               <div className="flex gap-1.5">
-                <button onClick={onClose} className="w-3 h-3 rounded-full bg-[hsl(0_70%_55%)] hover:brightness-110 cursor-pointer" />
+                <div className="w-3 h-3 rounded-full bg-[hsl(0_70%_55%)]" />
                 <div className="w-3 h-3 rounded-full bg-[hsl(45_70%_55%)]" />
                 <div className="w-3 h-3 rounded-full bg-[hsl(142_60%_45%)]" />
               </div>
@@ -37,6 +49,14 @@ export function ProjectModal({ project, showCase, onClose }: Props) {
                 ~/projects/{project.slug}
               </span>
             </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar modal"
+              className="h-7 w-7 rounded border border-border text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/40"
+            >
+              X
+            </button>
           </div>
 
           {/* Content */}

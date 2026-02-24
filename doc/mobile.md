@@ -377,7 +377,7 @@ Overlay de "carregando" que aparece brevemente (180ms) ao trocar de tela, simula
 
 **HomeScreen:**
 - Exibe relógio em tempo real (atualiza a cada segundo).
-- Status bar com nome da operadora (`BR-DEV` ou `BR-REC` conforme o modo).
+- Status bar com nome da operadora (`ISZ-DEV`).
 - Menu com 7 itens: About, Projects, Skills, Timeline, Contact, Settings, Extras.
 - Usa `useMenuNav` para navegação com D-pad.
 
@@ -509,7 +509,7 @@ Também existe a classe `.phone-screen-area` que esconde a scrollbar para manter
              │
              └── HomeScreen
                    ├── Relógio em tempo real
-                   ├── Status bar (BR-DEV)
+                   ├── Status bar (ISZ-DEV)
                    └── Menu com 7 itens (useMenuNav)
 
 4. Usuário toca em "Projects" (ou usa D-Pad + OK)

@@ -64,10 +64,25 @@ export function useMenuNav(itemCount: number, onOk?: (index: number) => void) {
 
 /* ── Provider ── */
 
+const LS_KEY_SOUND = 'phone-sound-on';
+
+function readSoundPref(): boolean {
+  try {
+    return localStorage.getItem(LS_KEY_SOUND) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export function PhoneProvider({ children }: { children: ReactNode }) {
   const [stack, setStack] = useState<ScreenEntry[]>([{ id: 'home' }]);
   const [theme, setTheme] = useState<PhoneTheme>('green');
-  const [soundOn, setSoundOn] = useState(false);
+  const [soundOn, _setSoundOn] = useState(readSoundPref);
+
+  const setSoundOn = useCallback((v: boolean) => {
+    _setSoundOn(v);
+    try { localStorage.setItem(LS_KEY_SOUND, String(v)); } catch {}
+  }, []);
 
   const push = useCallback((id: string, params?: Record<string, any>) => {
     setStack(s => [...s, { id, params }]);

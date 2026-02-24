@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, type SyntheticEvent } from 'react';
 import { usePhone, useMenuNav, usePhoneInput } from './PhoneContext';
 import { ScreenLayout, MenuList } from './ScreenLayout';
 import { SnakeScreen } from './SnakeGame';
@@ -21,13 +21,71 @@ function LoadingOverlay({ text }: { text: string }) {
   );
 }
 
+function TouchBlockOverlay() {
+  const blockInteraction = (event: SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  return (
+    <div
+      className="absolute inset-0 z-30"
+      onClick={blockInteraction}
+      onPointerDown={blockInteraction}
+      onTouchStart={blockInteraction}
+      aria-hidden="true"
+    />
+  );
+}
+
 /* ════════════════════════════════════════
    HOME SCREEN
    ════════════════════════════════════════ */
 
+function SignalBars() {
+  const [strength, setStrength] = useState(4);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const oscillate = () => {
+      const weights = [0, 0, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4];
+      setStrength(weights[Math.floor(Math.random() * weights.length)]);
+      timeout = setTimeout(oscillate, 5000 + Math.random() * 7000);
+    };
+    timeout = setTimeout(oscillate, 6000 + Math.random() * 5000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const bars = [
+    { height: 4 },
+    { height: 6 },
+    { height: 8 },
+    { height: 11 },
+  ];
+
+  return (
+    <span className="inline-flex items-end gap-[1.5px]" style={{ height: 11 }}>
+      {bars.map((bar, i) => (
+        <span
+          key={i}
+          style={{
+            width: 2.5,
+            height: bar.height,
+            backgroundColor: i < strength ? 'var(--phone-dim)' : 'var(--phone-border)',
+            opacity: i < strength ? 1 : 0.3,
+            borderRadius: 0.5,
+            transition: 'opacity 0.6s ease, background-color 0.6s ease',
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
 function HomeScreen() {
   const { push } = usePhone();
   const [time, setTime] = useState(new Date());
+  const screensRef = useRef(['about', 'projects', 'skills', 'timeline', 'contact', 'settings', 'extras']);
 
   useEffect(() => {
     const id = setInterval(() => setTime(new Date()), 1000);
@@ -44,21 +102,22 @@ function HomeScreen() {
     { label: 'Extras', icon: '♪' },
   ];
 
-  const screens = ['about', 'projects', 'skills', 'timeline', 'contact', 'settings', 'extras'];
-
-  const go = useCallback((i: number) => push(screens[i]), [push]);
+  const go = useCallback((i: number) => push(screensRef.current[i]), [push]);
   const { selectedIndex, setSelectedIndex } = useMenuNav(menuItems.length, go);
 
   const hh = time.getHours().toString().padStart(2, '0');
   const mm = time.getMinutes().toString().padStart(2, '0');
-  const carrier = 'BR-DEV';
+  const carrier = 'ISZ-DEV';
 
   return (
     <ScreenLayout softLeft="Menu" softRight="Select">
       {/* Status bar */}
-      <div className="flex justify-between px-1 text-[11px] mb-1" style={{ color: 'var(--phone-dim)' }}>
+      <div className="flex justify-between items-center px-1 text-[11px] mb-1" style={{ color: 'var(--phone-dim)' }}>
         <span>{carrier}</span>
-        <span>▓▓▓░ ████░</span>
+        <span className="flex items-center gap-1.5">
+          <SignalBars />
+          <span>████░</span>
+        </span>
       </div>
 
       {/* Clock */}
@@ -127,18 +186,25 @@ function ProjectsScreen() {
 function ProjectDetailScreen({ slug }: { slug: string }) {
   const project = projects.find(p => p.slug === slug);
 
-  const items = project
-    ? [
-        ...(project.links.live ? [{ label: 'Live ↗', icon: '▸' }] : []),
-        ...(project.links.github ? [{ label: 'GitHub ↗', icon: '▸' }] : []),
-      ]
-    : [];
+  const items = useMemo(() => {
+    if (!project) return [];
+    return [
+      ...(project.links.live ? [{ label: 'Live ↗', icon: '▸' }] : []),
+      ...(project.links.github ? [{ label: 'GitHub ↗', icon: '▸' }] : []),
+    ];
+  }, [project]);
 
   const handleLink = useCallback((i: number) => {
     if (!project) return;
-    if (items[i]?.label.startsWith('Live') && project.links.live) window.open(project.links.live, '_blank');
-    if (items[i]?.label.startsWith('GitHub') && project.links.github) window.open(project.links.github, '_blank');
-  }, [project, items]);
+    let idx = 0;
+    if (project.links.live) {
+      if (i === idx) window.open(project.links.live, '_blank');
+      idx += 1;
+    }
+    if (project.links.github) {
+      if (i === idx) window.open(project.links.github, '_blank');
+    }
+  }, [project]);
 
   const { selectedIndex, setSelectedIndex } = useMenuNav(items.length, handleLink);
 
@@ -257,13 +323,11 @@ function TimelineDetailScreen({ index }: { index: number }) {
 
 function ContactScreen() {
   const [copied, setCopied] = useState(false);
-  const [pinged, setPinged] = useState(false);
 
   const items = [
     { label: 'Email (copiar)', icon: '✉' },
     { label: 'LinkedIn ↗', icon: '▸' },
     { label: 'GitHub ↗', icon: '▸' },
-    { label: 'Send Ping 📡', icon: '►' },
   ];
 
   const handleSelect = useCallback((i: number) => {
@@ -278,10 +342,6 @@ function ContactScreen() {
       case 2:
         window.open('https://github.com/RaeII', '_blank');
         break;
-      case 3:
-        setPinged(true);
-        setTimeout(() => setPinged(false), 2000);
-        break;
     }
   }, []);
 
@@ -293,11 +353,6 @@ function ContactScreen() {
       {copied && (
         <div className="mt-3 text-center text-[12px] animate-pulse">
           ✓ Email copiado!
-        </div>
-      )}
-      {pinged && (
-        <div className="mt-3 text-center text-[12px] animate-pulse">
-          ✓ Ping enviado! Mensagem recebida.
         </div>
       )}
     </ScreenLayout>
@@ -346,12 +401,14 @@ function SettingsScreen() {
 const EXTRA_SECRET_SEQUENCE: Array<'up' | 'down' | 'left' | 'right'> = [
   'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right',
 ];
+const RINGTONE_URL = '/sound/Original Nokia-Downringtone.com.mp3';
 
 function ExtrasScreen() {
   const { push } = usePhone();
   const [msg, setMsg] = useState('');
   const [secretProgress, setSecretProgress] = useState(0);
   const secretProgressRef = useRef(0);
+  const ringtoneRef = useRef<HTMLAudioElement | null>(null);
 
   const items = [
     { label: 'Ringtone 🔔', icon: '♪' },
@@ -359,9 +416,25 @@ function ExtrasScreen() {
     { label: 'About Phone', icon: 'ℹ' },
   ];
 
+  useEffect(() => {
+    return () => {
+      ringtoneRef.current?.pause();
+      ringtoneRef.current = null;
+    };
+  }, []);
+
   const handleSelect = useCallback((i: number) => {
     switch (i) {
-      case 0: setMsg('♪ beep boop beep ♪'); break;
+      case 0: {
+        const ringtone = ringtoneRef.current ?? new Audio(RINGTONE_URL);
+        ringtoneRef.current = ringtone;
+        ringtone.preload = 'auto';
+        ringtone.loop = false;
+        ringtone.currentTime = 0;
+        ringtone.play().catch(() => {});
+        setMsg('♪ Tocando ringtone...');
+        break;
+      }
       case 1: push('snake'); break;
       case 2: setMsg('PocketOS v1.0\nby Israel Zeferino\nPowered by ☕ and 💻'); break;
     }
@@ -453,6 +526,7 @@ export function PhoneScreens() {
     <div className="relative w-full h-full">
       {screen}
       {loading && <LoadingOverlay text={loadingText} />}
+      <TouchBlockOverlay />
     </div>
   );
 }
