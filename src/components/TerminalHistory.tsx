@@ -20,10 +20,14 @@ export function TerminalHistory({ entries }: Props) {
               <span className="text-terminal-prompt font-bold shrink-0">israel@portfolio:~$</span>
               <span className="ml-2 text-foreground">{entry.content}</span>
             </div>
-          ) : (
+          ) : typeof entry.content === "string" ? (
             <pre className="whitespace-pre-wrap text-foreground/90 leading-relaxed font-mono text-xs sm:text-sm break-words">
               {processOutput(entry.content)}
             </pre>
+          ) : (
+            <div className="text-foreground/90 leading-relaxed font-mono text-xs sm:text-sm">
+              {entry.content}
+            </div>
           )}
         </motion.div>
       ))}

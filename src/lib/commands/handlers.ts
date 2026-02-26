@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { projects } from "@/data/projects";
 import { skillGroups } from "@/data/skills";
 import type { ParsedCommand } from "./parser";
@@ -156,7 +156,7 @@ export const commands: CommandDef[] = [
     name: "projects",
     description: "Lista de projetos (use --tag, --year, --featured)",
     usage: "projects [--tag <tag>] [--year <ano>] [--featured]",
-    run: (parsed) => {
+    run: (parsed, ctx) => {
       let filtered = [...projects];
 
       if (parsed.flags.tag) {
@@ -174,7 +174,22 @@ export const commands: CommandDef[] = [
       }
 
       const cards = filtered.map(p => formatProjectCard(p)).join("\n\n");
-      return `${filtered.length} projeto(s) encontrado(s):\n\n${cards}\n\n→ Use "open <slug>" para mais detalhes.\n  Slugs: ${filtered.map(p => p.slug).join(", ")}`;
+      const text = `${filtered.length} projeto(s) encontrado(s):\n\n${cards}\n\n→ Clique para ver detalhes:`;
+
+      return React.createElement("div", null,
+        React.createElement("pre", {
+          className: "whitespace-pre-wrap break-words"
+        }, text),
+        React.createElement("div", {
+          className: "flex flex-wrap gap-2 mt-3"
+        }, filtered.map((p) =>
+          React.createElement("button", {
+            key: p.slug,
+            onClick: () => ctx.openProject(p.slug),
+            className: "px-3 py-1 text-xs font-mono rounded border border-border bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-200 hover:terminal-glow cursor-pointer"
+          }, `open ${p.slug}`)
+        ))
+      );
     },
   },
   {

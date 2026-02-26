@@ -10,7 +10,7 @@ import { projects } from "@/data/projects";
 
 export interface HistoryEntry {
   type: "input" | "output";
-  content: string;
+  content: string | React.ReactNode;
   timestamp: number;
 }
 
@@ -23,7 +23,7 @@ interface TerminalState {
 
 type Action =
   | { type: "ADD_INPUT"; content: string }
-  | { type: "ADD_OUTPUT"; content: string }
+  | { type: "ADD_OUTPUT"; content: string | React.ReactNode }
   | { type: "CLEAR" }
   | { type: "SET_THEME"; theme: ThemeName }
   | { type: "SET_HISTORY_INDEX"; index: number };
@@ -80,21 +80,40 @@ export function Terminal({ embedded = false }: { embedded?: boolean }) {
     localStorage.setItem("terminal-theme", state.theme);
   }, [state.theme]);
 
-  // Scroll to anchor position, or stay at top if content fits without scrolling
+  // Scroll suave customizado com duração controlada
   useEffect(() => {
-    if (scrollRef.current) {
-      const { scrollHeight, clientHeight } = scrollRef.current;
-      scrollRef.current.scrollTop = scrollHeight <= clientHeight ? 0 : scrollAnchor.current;
-    }
+    requestAnimationFrame(() => {
+      if (!scrollRef.current) return;
+      const el = scrollRef.current;
+      const { scrollHeight, clientHeight } = el;
+      const target = scrollHeight <= clientHeight ? 0 : scrollAnchor.current;
+      const start = el.scrollTop;
+      const diff = target - start;
+      if (Math.abs(diff) < 1) return;
+
+      const duration = 600; // ms — quanto maior, mais lento
+      let startTime: number | null = null;
+
+      const ease = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+      const step = (time: number) => {
+        if (!startTime) startTime = time;
+        const progress = Math.min((time - startTime) / duration, 1);
+        el.scrollTop = start + diff * ease(progress);
+        if (progress < 1) requestAnimationFrame(step);
+      };
+
+      requestAnimationFrame(step);
+    });
   }, [state.history]);
 
   const handleCommand = useCallback((input: string) => {
     const trimmed = input.trim();
     if (!trimmed) return;
 
-    // Save current scroll position + small offset so scroll nudges down on command
+    // Salva posição atual do scroll + offset maior para rolar mais para baixo no comando
     if (scrollRef.current) {
-      scrollAnchor.current = scrollRef.current.scrollTop + 60;
+      scrollAnchor.current = scrollRef.current.scrollTop + 250;
     }
 
     dispatch({ type: "ADD_INPUT", content: trimmed });
@@ -114,7 +133,7 @@ export function Terminal({ embedded = false }: { embedded?: boolean }) {
     const ctx = {
       setTheme: (t: ThemeName) => dispatch({ type: "SET_THEME", theme: t }),
       clearHistory: () => dispatch({ type: "CLEAR" }),
-      addOutput: (content: string) => dispatch({ type: "ADD_OUTPUT", content: String(content) }),
+      addOutput: (content: string | React.ReactNode) => dispatch({ type: "ADD_OUTPUT", content }),
       openProject: (slug: string, cs?: boolean) => {
         const project = projects.find(p => p.slug === slug);
         if (project) {
@@ -130,8 +149,12 @@ export function Terminal({ embedded = false }: { embedded?: boolean }) {
     };
 
     const result = cmd.run(parsed, ctx);
-    if (result && typeof result === "string" && result.length > 0) {
-      dispatch({ type: "ADD_OUTPUT", content: result });
+    if (result) {
+      if (typeof result === "string" && result.length > 0) {
+        dispatch({ type: "ADD_OUTPUT", content: result });
+      } else if (typeof result !== "string") {
+        dispatch({ type: "ADD_OUTPUT", content: result });
+      }
     }
   }, []);
 
