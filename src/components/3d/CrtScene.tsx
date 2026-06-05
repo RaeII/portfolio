@@ -1,11 +1,9 @@
-import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
+import { Component, Suspense, useEffect, useState, useCallback, useRef, type ReactNode } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import { PcModel } from './PcModel';
-import { CrtFallback } from './CrtFallback';
 import { ScreenOverlay } from './ScreenOverlay';
 import { Terminal } from '../Terminal';
-import { useIsMobile } from '@/hooks/use-mobile';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { type Vec3 } from './DecalPositionControls';
@@ -16,6 +14,30 @@ function detectWebGL(): boolean {
     return !!(c.getContext('webgl2') || c.getContext('webgl'));
   } catch {
     return false;
+  }
+}
+
+// Fallback exibido quando o navegador não consegue criar um contexto WebGL
+// (ex.: aceleração de hardware desativada). Mostra apenas o terminal — sem o PC 3D.
+function TerminalOnlyFallback({ onReady }: { onReady?: () => void }) {
+  useEffect(() => {
+    onReady?.();
+  }, [onReady]);
+  return <Terminal />;
+}
+
+// Rede de segurança: captura falhas de criação do contexto WebGL que escapem
+// da detecção prévia e cai para o terminal em vez de quebrar a árvore React.
+class WebGLErrorBoundary extends Component<
+  { fallback: ReactNode; children: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
   }
 }
 
@@ -161,29 +183,22 @@ const DEFAULT_BTC_ROUGH = 0.35;
 const DEFAULT_BTC_METAL = 0.66;
 
 export function CrtScene({ onReady, introStart }: { onReady?: () => void; introStart?: boolean }) {
-  const [webgl, setWebgl] = useState(true);
   const [focusTerminal, setFocusTerminal] = useState(false);
-  const isMobile = useIsMobile();
+  const [webgl] = useState(() => detectWebGL());
   const portalRef = useRef<HTMLDivElement>(null);
   const introPhase = !introStart;
-
-  useEffect(() => {
-    setWebgl(detectWebGL());
-  }, []);
-
-  useEffect(() => {
-    if (!webgl || isMobile) onReady?.();
-  }, [webgl, isMobile, onReady]);
 
   const handleTerminalFocus = useCallback(() => {
     setFocusTerminal(true);
   }, []);
 
-  if (!webgl || isMobile) {
-    return <CrtFallback />;
+  // Sem suporte a WebGL (ex.: aceleração de hardware desativada): só o terminal.
+  if (!webgl) {
+    return <TerminalOnlyFallback onReady={onReady} />;
   }
 
   return (
+    <WebGLErrorBoundary fallback={<TerminalOnlyFallback onReady={onReady} />}>
     <div
       className="relative w-full h-screen overflow-hidden"
       style={{
@@ -286,5 +301,6 @@ export function CrtScene({ onReady, introStart }: { onReady?: () => void; introS
 
       </Canvas>
     </div>
+    </WebGLErrorBoundary>
   );
 }
